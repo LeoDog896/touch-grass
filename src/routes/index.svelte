@@ -2,12 +2,20 @@
   import { onMount, tick } from "svelte";
 
   interface GrassBlade {
+    xValues: number[];
     height: number;
   }
 
-  let blades: GrassBlade[] = Array(10).fill(0).map((_, i) => ({
-    height: Math.random() * 500 + 100
-  }));
+  const bladeAmount = 30;
+
+  const generateRandomNumber = (min: number, max: number) => Math.random() * (max - min) + min;
+
+  let blades: GrassBlade[] = Array(bladeAmount).fill(0).map((_, i) => {
+    return {
+      xValues: Array(10).fill(0).map(it => generateRandomNumber(-10, 10)),
+      height: Math.random() * 500 + 100,
+    }
+  });
 
   let width = 600;
   let height = 600;
@@ -19,9 +27,16 @@
     if (!ctx) return;
     ctx.clearRect(0, 0, width, height);
 
-    ctx.fillStyle = "green";
+    ctx.strokeStyle = "green";
     blades.forEach((blade, i) => {
-      ctx.fillRect((window.innerWidth / 11) + (i * window.innerWidth / 11), 0, 5, blade.height);
+      const x = (window.innerWidth / (bladeAmount + 1)) + (i * window.innerWidth / (bladeAmount + 1));
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      for (let i = 0; i < blade.xValues.length; i++) {
+        ctx.lineTo(x + blade.xValues[i], blade.height / blade.xValues.length * i);
+      }
+      ctx.lineTo(x, blade.height);
+      ctx.stroke();
     });
   }
 
